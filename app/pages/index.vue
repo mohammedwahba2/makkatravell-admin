@@ -87,7 +87,7 @@ const initials = (n: string) => n.trim().split(/\s+/).slice(0, 2).map((x) => x[0
 
       <!-- upcoming departures -->
       <section class="panel rise p-6 lg:col-span-7" style="animation-delay:.15s">
-        <div class="mb-4 flex items-center justify-between"><div><p class="eyebrow mb-1">القادمة</p><h2 class="text-lg font-extrabold text-brand-950">مواعيد السفر والمقاعد</h2></div><UButton to="/packages" color="neutral" variant="ghost" size="sm" trailing-icon="i-lucide-arrow-up-left">البرامج</UButton></div>
+        <div class="mb-4 flex items-center justify-between"><div><p class="eyebrow mb-1">القادمة</p><h2 class="text-lg font-extrabold text-brand-950">مواعيد السفر والمقاعد</h2></div><UButton to="/departures" color="neutral" variant="ghost" size="sm" trailing-icon="i-lucide-arrow-up-left">القوائم</UButton></div>
         <div v-if="loading" class="space-y-4"><USkeleton v-for="i in 4" :key="i" class="h-10" /></div>
         <p v-else-if="!s.departures.length" class="py-10 text-center text-sm text-brand-500">لا توجد مواعيد قادمة. أضف مواعيد من صفحة البرنامج.</p>
         <ul v-else class="divide-y divide-brand-100">

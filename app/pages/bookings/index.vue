@@ -14,12 +14,22 @@ const chips = computed(() => {
   const by = (stats.value?.byStatus ?? {}) as Record<string, number>
   return [{ label: 'الكل', value: 'all', count: stats.value?.bookings }, ...Object.entries(BOOKING_STATUS).map(([value, label]) => ({ label, value, count: by[value] ?? 0 }))]
 })
+const { download } = useApi()
+const notify = useNotify()
+const exporting = ref(false)
+async function exportAll() {
+  exporting.value = true
+  try { await download('/admin/bookings/export', { status: status.value === 'all' ? undefined : status.value, q: qd.value || undefined }); notify.ok('تم تنزيل الملف') }
+  catch (e) { notify.err(errMsg(e)) } finally { exporting.value = false }
+}
 const loading = computed(() => st.value === 'pending' && !data.value)
 </script>
 
 <template>
   <div>
-    <UiPageHead title="الحجوزات" sub="تابع طلبات الحجز وأكّدها" />
+    <UiPageHead title="الحجوزات" sub="تابع طلبات الحجز وأكّدها">
+      <UButton color="neutral" variant="outline" icon="i-lucide-download" :loading="exporting" @click="exportAll">تصدير Excel</UButton>
+    </UiPageHead>
     <FilterBar v-model:q="q" v-model:chip="status" placeholder="بحث بالاسم أو الهاتف أو رقم الحجز" :chips="chips" :total="data?.total" unit="حجز" />
 
     <div class="panel rise overflow-x-auto" style="animation-delay:.08s">

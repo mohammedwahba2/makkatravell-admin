@@ -32,9 +32,40 @@ export const useApi = () => {
     }
   }
 
-  async function upload(file: File): Promise<string> {
+  // Phones produce 5–10 MB photos; Vercel rejects bodies > 4.5 MB, so downscale + re-encode first.
+  async function compress(file: File): Promise<File> {
+    if (!file.type.startsWith('image/') || file.size < 600_000) return file
+    try {
+      const bmp = await createImageBitmap(file)
+      const k = Math.min(1, 2000 / Math.max(bmp.width, bmp.height))
+      const c = document.createElement('canvas')
+      c.width = Math.round(bmp.width * k); c.height = Math.round(bmp.height * k)
+      c.getContext('2d')!.drawImage(bmp, 0, 0, c.width, c.height)
+      const blob = await new Promise<Blob | null>((res) => c.toBlob(res, 'image/webp', 0.85))
+      return blob ? new File([blob], file.name.replace(/\.\w+$/, '') + '.webp', { type: 'image/webp' }) : file
+    } catch { return file }
+  }
+
+  /** Authenticated file download (CSV exports): reads the filename from Content-Disposition. */
+  async function download(path: string, query?: Record<string, unknown>, retry = true): Promise<void> {
+    try {
+      const r = await $fetch.raw<Blob>(`${base}${path}`, { query: query as never, responseType: 'blob',
+        headers: auth.tokens.value ? { Authorization: `Bearer ${auth.tokens.value.accessToken}` } : undefined })
+      const m = /filename\*=UTF-8''([^;]+)/i.exec(r.headers.get('content-disposition') ?? '')
+      const a = document.createElement('a')
+      a.href = URL.createObjectURL(r._data as Blob); a.download = m ? decodeURIComponent(m[1]!) : 'export.csv'
+      document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 2000)
+    } catch (e: any) {
+      if (e?.statusCode === 401 && retry && (await tryRefresh())) return download(path, query, false)
+      if (e?.statusCode === 401) { auth.clear(); await navigateTo('/login') }
+      throw e
+    }
+  }
+
+  async function upload(input: File): Promise<string> {
+    const file = await compress(input)
     const fd = new FormData(); fd.append('file', file)
     return (await api<{ url: string }>('/admin/uploads', { method: 'POST', body: fd })).url
   }
-  return { api, upload }
+  return { api, upload, download }
 }

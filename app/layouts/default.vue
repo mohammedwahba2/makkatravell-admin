@@ -15,6 +15,7 @@ const groups = computed(() => [
   { title: 'التشغيل', items: [
     { to: '/', label: 'نظرة عامة', icon: 'i-lucide-layout-grid' },
     { to: '/bookings', label: 'الحجوزات', icon: 'i-lucide-ticket', badge: stats.value?.pending },
+    { to: '/departures', label: 'مواعيد السفر', icon: 'i-lucide-calendar-check' },
     { to: '/inquiries', label: 'رسائل التواصل', icon: 'i-lucide-inbox', badge: stats.value?.newInquiries },
   ] },
   { title: 'المحتوى', items: [
@@ -23,7 +24,10 @@ const groups = computed(() => [
     { to: '/faqs', label: 'الأسئلة الشائعة', icon: 'i-lucide-circle-help' },
     { to: '/testimonials', label: 'آراء العملاء', icon: 'i-lucide-quote' },
   ] },
-  { title: 'النظام', items: [{ to: '/settings', label: 'إعدادات الموقع', icon: 'i-lucide-sliders-horizontal' }] },
+  { title: 'النظام', items: [
+    ...(auth.user.value?.role === 'ADMIN' ? [{ to: '/users', label: 'الفريق', icon: 'i-lucide-users' }] : []),
+    { to: '/settings', label: 'إعدادات الموقع', icon: 'i-lucide-sliders-horizontal' },
+  ] },
 ])
 const isActive = (to: string) => (to === '/' ? route.path === '/' : route.path.startsWith(to))
 const alerts = computed(() => (stats.value?.pending ?? 0) + (stats.value?.newInquiries ?? 0))
@@ -33,7 +37,12 @@ async function logout() {
   try { await api('/auth/logout', { method: 'POST' }) } catch { /* token may already be invalid */ }
   auth.clear(); await navigateTo('/login')
 }
-const menu = computed(() => [[{ label: auth.user.value?.email ?? '', type: 'label' as const }], [{ label: 'تسجيل الخروج', icon: 'i-lucide-log-out', color: 'error' as const, onSelect: logout }]])
+const pwOpen = ref(false)
+const menu = computed(() => [
+  [{ label: auth.user.value?.email ?? '', type: 'label' as const }],
+  [{ label: 'تغيير كلمة المرور', icon: 'i-lucide-key-round', onSelect: () => { pwOpen.value = true } }],
+  [{ label: 'تسجيل الخروج', icon: 'i-lucide-log-out', color: 'error' as const, onSelect: logout }],
+])
 const today = greg(), hj = hijri()
 </script>
 
@@ -70,6 +79,7 @@ const today = greg(), hj = hijri()
           </UDropdownMenu>
         </div>
       </header>
+      <ChangePasswordModal v-model:open="pwOpen" />
       <main class="mx-auto max-w-[1360px] p-4 sm:p-6 lg:p-8"><slot /></main>
     </div>
   </div>

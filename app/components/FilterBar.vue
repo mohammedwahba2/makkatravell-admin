@@ -1,6 +1,6 @@
 <script setup lang="ts">
 export interface Chip { label: string; value: string; count?: number }
-defineProps<{ placeholder?: string; chips?: Chip[]; total?: number; unit?: string }>()
+withDefaults(defineProps<{ placeholder?: string; chips?: Chip[]; total?: number; unit?: string; searchable?: boolean }>(), { searchable: true })
 const q = defineModel<string>('q', { default: '' })
 const chip = defineModel<string>('chip', { default: 'all' })
 
@@ -27,7 +27,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
 
     <div class="flex items-center gap-3">
       <span v-if="total !== undefined" class="hidden whitespace-nowrap text-[13px] text-brand-500 sm:block"><b class="num text-brand-900">{{ total }}</b> {{ unit }}</span>
-      <UInput ref="input" v-model="q" variant="none" icon="i-lucide-search" :placeholder="placeholder ?? 'بحث…'" class="w-full lg:w-80"
+      <UInput v-if="searchable" ref="input" v-model="q" variant="none" icon="i-lucide-search" :placeholder="placeholder ?? 'بحث…'" class="w-full lg:w-80"
         :ui="{ base: 'h-9 rounded-md bg-white shadow-[0_1px_2px_rgb(59_36_24/.06)] transition focus-visible:ring-2 focus-visible:ring-brand-500', leadingIcon: 'text-brand-400' }">
         <template #trailing>
           <UButton v-if="q" color="neutral" variant="link" size="xs" icon="i-lucide-x" aria-label="مسح" @click="q = ''" />
