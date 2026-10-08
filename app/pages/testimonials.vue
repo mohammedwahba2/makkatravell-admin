@@ -30,9 +30,9 @@ async function remove(x: { id: string; name: string }) {
   <div>
     <UiPageHead title="آراء العملاء"><UButton icon="i-lucide-plus" @click="edit()">رأي جديد</UButton></UiPageHead>
     <div v-if="loading" class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3"><USkeleton v-for="i in 3" :key="i" class="h-44 rounded-2xl" /></div>
-    <p v-else-if="!data?.length" class="rounded-2xl bg-white p-12 text-center text-brand-500 ring ring-brand-200/70">لا توجد آراء</p>
+    <p v-else-if="!data?.length" class="panel p-12 text-center text-brand-500">لا توجد آراء</p>
     <div v-else class="stagger grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-      <article v-for="x in data" :key="x.id" class="lift flex flex-col rounded-2xl bg-white p-5 ring ring-brand-200/70">
+      <article v-for="x in data" :key="x.id" class="panel lift flex flex-col p-5">
         <div class="mb-2 flex text-amber-500"><UIcon v-for="n in x.rating" :key="n" name="i-lucide-star" class="size-4 fill-current" /></div>
         <p class="flex-1 text-sm leading-7">{{ x.text }}</p>
         <div class="mt-4 flex items-center justify-between gap-2">

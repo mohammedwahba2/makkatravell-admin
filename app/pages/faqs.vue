@@ -30,7 +30,7 @@ async function remove(x: { id: string; question: string }) {
     <UiPageHead title="الأسئلة الشائعة" sub="تظهر في صفحة الأسئلة وتدعم نتائج جوجل (FAQ schema)">
       <UButton icon="i-lucide-plus" @click="edit()">سؤال جديد</UButton>
     </UiPageHead>
-    <div class="rise divide-y divide-brand-100 rounded-2xl bg-white ring ring-brand-200/70">
+    <div class="panel rise divide-y divide-brand-100">
       <div v-if="loading" class="space-y-3 p-4"><USkeleton v-for="i in 4" :key="i" class="h-14" /></div>
       <p v-else-if="!data?.length" class="p-12 text-center text-brand-500">لا توجد أسئلة</p>
       <div v-for="x in data" :key="x.id" class="flex items-start gap-3 p-4 transition hover:bg-brand-50/60">

@@ -2,8 +2,11 @@
 defineProps<{ title: string; sub?: string }>()
 </script>
 <template>
-  <div class="flex flex-wrap items-end justify-between gap-3 mb-6 rise">
-    <div><h1 class="text-2xl sm:text-3xl font-extrabold text-brand-900">{{ title }}</h1><p v-if="sub" class="text-sm text-brand-500 mt-1">{{ sub }}</p></div>
+  <div class="rise mb-7 flex flex-wrap items-end justify-between gap-4 border-b hair pb-5">
+    <div>
+      <p v-if="sub" class="eyebrow mb-1.5">{{ sub }}</p>
+      <h1 class="text-[28px] font-extrabold leading-tight tracking-tight text-brand-950">{{ title }}</h1>
+    </div>
     <div class="flex items-center gap-2"><slot /></div>
   </div>
 </template>

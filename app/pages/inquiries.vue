@@ -19,9 +19,9 @@ async function remove(m: { id: string; name: string }) {
   <div>
     <UiPageHead title="رسائل التواصل" sub="الرسائل القادمة من نموذج اتصل بنا" />
     <div v-if="loading" class="space-y-3"><USkeleton v-for="i in 3" :key="i" class="h-32 rounded-2xl" /></div>
-    <p v-else-if="!data?.items.length" class="rounded-2xl bg-white p-12 text-center text-brand-500 ring ring-brand-200/70">لا توجد رسائل</p>
+    <p v-else-if="!data?.items.length" class="panel p-12 text-center text-brand-500">لا توجد رسائل</p>
     <div v-else class="stagger space-y-3">
-      <article v-for="m in data.items" :key="m.id" class="rounded-2xl bg-white p-5 ring ring-brand-200/70">
+      <article v-for="m in data.items" :key="m.id" class="panel p-5">
         <div class="mb-2 flex flex-wrap items-center justify-between gap-2">
           <div class="flex items-center gap-3"><p class="font-extrabold">{{ m.name }}</p><StatusBadge kind="inquiry" :value="m.status" /></div>
           <span class="text-xs text-brand-500">{{ fdatetime(m.createdAt) }}</span>

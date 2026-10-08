@@ -18,54 +18,66 @@ async function submit() {
     await navigateTo('/')
   } catch (e) { error.value = errMsg(e) } finally { busy.value = false }
 }
+
+// nested pointed arches (mihrab motif), drawn as SVG
+const SQ3 = Math.sqrt(3)
+const arch = (w: number, h: number) => `M${-w} 0 V${-h} A${2 * w} ${2 * w} 0 0 1 0 ${-(h + w * SQ3)} A${2 * w} ${2 * w} 0 0 1 ${w} ${-h} V0`
+const arches = Array.from({ length: 9 }, (_, i) => ({ w: 34 + i * 30, h: 120 + i * 18, d: i }))
 </script>
 
 <template>
-  <div class="relative min-h-screen overflow-hidden bg-gradient-to-br from-brand-900 via-brand-800 to-brand-950 grid lg:grid-cols-2">
-    <!-- animated background -->
-    <div class="pointer-events-none absolute inset-0">
-      <div class="absolute -top-32 -start-24 size-[28rem] rounded-full bg-brand-500/30 blur-3xl" style="animation: float 11s ease-in-out infinite" />
-      <div class="absolute -bottom-40 -end-24 size-[30rem] rounded-full bg-brand-400/25 blur-3xl" style="animation: float 14s ease-in-out infinite reverse" />
-      <div class="absolute inset-0 opacity-[.07]" style="background-image: radial-gradient(#fff 1px, transparent 1px); background-size: 28px 28px" />
-    </div>
-
-    <!-- brand side -->
-    <div class="relative hidden lg:flex flex-col justify-between p-14 text-brand-100">
-      <img src="/logo-mark.png" alt="مكة للسياحة" class="size-20 rounded-2xl bg-white p-2 object-contain shadow-2xl rise" />
-      <div class="stagger">
-        <h2 class="text-5xl font-extrabold leading-[1.25] text-white">أدِر رحلاتك<br />وحجوزاتك<br /><span class="text-brand-300">من مكان واحد</span></h2>
-        <p class="mt-5 max-w-sm text-brand-300 leading-8">لوحة تحكم مكة للسياحة – دمياط. تابع الحجوزات، وحدّث البرامج والأسعار، وتواصل مع عملائك بسهولة.</p>
-        <div class="mt-8 flex gap-6 text-sm text-brand-200">
-          <span class="flex items-center gap-2"><UIcon name="i-lucide-shield-check" class="size-5 text-brand-300" />اتصال آمن</span>
-          <span class="flex items-center gap-2"><UIcon name="i-lucide-zap" class="size-5 text-brand-300" />تحديث فوري</span>
+  <div class="grid min-h-screen bg-brand-100 lg:grid-cols-[1.15fr_1fr]">
+    <!-- art side -->
+    <div class="grain relative hidden overflow-hidden bg-brand-950 lg:block">
+      <svg class="absolute inset-0 size-full" viewBox="0 0 700 900" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
+        <defs>
+          <pattern id="star" width="44" height="44" patternUnits="userSpaceOnUse">
+            <path d="M22 3 L26 14 L37 10 L33 21 L44 22 L33 25 L37 36 L26 30 L22 41 L18 30 L7 36 L11 25 L0 22 L11 21 L7 10 L18 14 Z" fill="none" stroke="#C98F68" stroke-opacity=".10" stroke-width=".6" />
+          </pattern>
+          <linearGradient id="gl" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#E8DCCB" /><stop offset="1" stop-color="#A56F4D" /></linearGradient>
+          <radialGradient id="glow" cx=".5" cy="1" r=".8"><stop offset="0" stop-color="#A56F4D" stop-opacity=".35" /><stop offset="1" stop-color="#A56F4D" stop-opacity="0" /></radialGradient>
+        </defs>
+        <rect width="700" height="900" fill="url(#star)" />
+        <rect width="700" height="900" fill="url(#glow)" />
+        <g transform="translate(350 900)" fill="none" stroke="url(#gl)">
+          <path v-for="a in arches" :key="a.d" :d="arch(a.w, a.h)" :stroke-width="a.d === 0 ? 1.6 : 1" :stroke-opacity="1 - a.d * 0.09" pathLength="1" stroke-dasharray="1"
+            :style="{ animation: `draw 2.2s cubic-bezier(.4,0,.2,1) ${a.d * 0.16}s both` }" />
+        </g>
+        <circle cx="350" cy="148" r="3" fill="#E8DCCB" class="pulse-dot" />
+      </svg>
+      <div class="relative z-10 flex h-full flex-col justify-between p-14">
+        <div class="rise flex items-center gap-3"><img src="/logo-mark.png" alt="" class="size-12 rounded-md bg-white object-contain p-1.5" /><div class="leading-tight"><p class="text-lg font-extrabold text-white">مكة للسياحة</p><p class="text-[11px] tracking-[.18em] text-brand-300">MAKKA TRAVEL · دمياط</p></div></div>
+        <div class="stagger max-w-md">
+          <p class="eyebrow mb-4 !text-brand-300">لوحة الإدارة</p>
+          <h2 class="text-[46px] font-extrabold leading-[1.2] text-white">رحلات الحج والعمرة،<br /><span class="text-brand-300">تحت إدارتك.</span></h2>
+          <p class="mt-5 leading-8 text-brand-200/80">تابع الحجوزات، وحدّث البرامج والمواعيد والأسعار، ورد على عملائك من مكان واحد.</p>
         </div>
       </div>
-      <p class="text-xs text-brand-400">© مكة للسياحة</p>
     </div>
 
     <!-- form side -->
-    <div class="relative flex items-center justify-center p-5 sm:p-8">
-      <form class="rise w-full max-w-md rounded-3xl bg-white/95 p-8 sm:p-10 shadow-2xl shadow-black/30 backdrop-blur" style="animation-delay: .1s" @submit.prevent="submit">
-        <img src="/logo-mark.png" alt="" class="lg:hidden mb-5 size-14 rounded-xl bg-brand-100 p-1.5 object-contain" />
-        <h1 class="text-3xl font-extrabold text-brand-900">أهلًا بعودتك</h1>
-        <p class="mt-1.5 mb-7 text-sm text-brand-500">سجّل الدخول للمتابعة إلى لوحة الإدارة</p>
+    <div class="flex items-center justify-center px-6 py-12 sm:px-12">
+      <form class="rise w-full max-w-[22rem]" @submit.prevent="submit">
+        <img src="/logo-mark.png" alt="" class="mb-8 size-12 rounded-md bg-white object-contain p-1.5 lg:hidden" />
+        <p class="eyebrow mb-3">تسجيل الدخول</p>
+        <h1 class="text-[34px] font-extrabold leading-tight tracking-tight text-brand-950">أهلًا بعودتك</h1>
+        <p class="mb-9 mt-2 text-[15px] text-brand-600">أدخل بيانات حساب الإدارة للمتابعة.</p>
 
-        <UFormField label="البريد الإلكتروني" class="mb-4">
-          <UInput v-model="email" type="email" required autocomplete="username" dir="ltr" size="xl" icon="i-lucide-mail" placeholder="admin@makkatravell.com" class="w-full" />
+        <UFormField label="البريد الإلكتروني" class="mb-5">
+          <UInput v-model="email" type="email" required autocomplete="username" dir="ltr" size="xl" placeholder="name@makkatravell.com" class="w-full" />
         </UFormField>
-        <UFormField label="كلمة المرور" class="mb-5">
-          <UInput v-model="password" :type="show ? 'text' : 'password'" required autocomplete="current-password" dir="ltr" size="xl" icon="i-lucide-lock" class="w-full" :ui="{ trailing: 'pe-1' }">
-            <template #trailing>
-              <UButton color="neutral" variant="link" size="sm" :icon="show ? 'i-lucide-eye-off' : 'i-lucide-eye'" :aria-label="show ? 'إخفاء' : 'إظهار'" @click="show = !show" />
-            </template>
+        <UFormField label="كلمة المرور" class="mb-6">
+          <UInput v-model="password" :type="show ? 'text' : 'password'" required autocomplete="current-password" dir="ltr" size="xl" class="w-full" :ui="{ trailing: 'pe-1' }">
+            <template #trailing><UButton color="neutral" variant="link" size="sm" :icon="show ? 'i-lucide-eye-off' : 'i-lucide-eye'" :aria-label="show ? 'إخفاء' : 'إظهار'" @click="show = !show" /></template>
           </UInput>
         </UFormField>
 
-        <Transition enter-active-class="transition duration-300" enter-from-class="opacity-0 -translate-y-2" leave-active-class="transition duration-200" leave-to-class="opacity-0">
-          <UAlert v-if="error" color="error" variant="subtle" icon="i-lucide-circle-alert" :description="error" class="mb-5" />
+        <Transition enter-active-class="transition duration-300" enter-from-class="opacity-0 -translate-y-1" leave-active-class="transition duration-200" leave-to-class="opacity-0">
+          <p v-if="error" class="mb-5 flex items-start gap-2 border-s-2 border-red-500 bg-red-50 px-3 py-2.5 text-sm text-red-800" role="alert"><UIcon name="i-lucide-circle-alert" class="mt-0.5 size-4 shrink-0" />{{ error }}</p>
         </Transition>
 
-        <UButton type="submit" size="xl" block :loading="busy" trailing-icon="i-lucide-arrow-left">تسجيل الدخول</UButton>
+        <UButton type="submit" size="xl" block :loading="busy" trailing-icon="i-lucide-arrow-left">دخول</UButton>
+        <p class="mt-8 flex items-center gap-2 text-[12px] text-brand-500"><UIcon name="i-lucide-lock-keyhole" class="size-3.5" />اتصال مشفّر · الجلسات محمية بتجديد تلقائي</p>
       </form>
     </div>
   </div>

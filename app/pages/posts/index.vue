@@ -16,7 +16,7 @@ async function remove(p: { id: string; title: string }) {
     <UiPageHead title="المدونة" sub="مقالات وإرشادات الحج والعمرة (تدعم ظهور الموقع في جوجل)">
       <UButton to="/posts/new" icon="i-lucide-plus">مقال جديد</UButton>
     </UiPageHead>
-    <div class="rise divide-y divide-brand-100 rounded-2xl bg-white ring ring-brand-200/70">
+    <div class="panel rise divide-y divide-brand-100">
       <div v-if="loading" class="space-y-3 p-4"><USkeleton v-for="i in 4" :key="i" class="h-14" /></div>
       <p v-else-if="!data?.items.length" class="p-12 text-center text-brand-500">لا توجد مقالات</p>
       <div v-for="p in data?.items" :key="p.id" class="flex items-center gap-4 p-4 transition hover:bg-brand-50/60">

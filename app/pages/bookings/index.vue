@@ -16,12 +16,12 @@ const loading = computed(() => st.value === 'pending' && !data.value)
 <template>
   <div>
     <UiPageHead title="الحجوزات" sub="تابع طلبات الحجز وأكّدها" />
-    <div class="rise mb-4 flex flex-wrap gap-3 rounded-2xl bg-white p-4 ring ring-brand-200/70">
+    <div class="panel rise mb-4 flex flex-wrap gap-3 p-4">
       <UInput v-model="q" icon="i-lucide-search" placeholder="بحث بالاسم أو الهاتف أو رقم الحجز" class="w-full sm:w-80" />
       <USelect v-model="status" :items="statusItems" class="w-full sm:w-52" />
     </div>
 
-    <div class="rise overflow-x-auto rounded-2xl bg-white ring ring-brand-200/70" style="animation-delay:.08s">
+    <div class="panel rise overflow-x-auto" style="animation-delay:.08s">
       <table class="w-full min-w-[820px] text-sm">
         <thead class="bg-brand-50 text-xs text-brand-700">
           <tr><th class="p-3 text-start">رقم الحجز</th><th class="p-3 text-start">العميل</th><th class="p-3 text-start">البرنامج</th><th class="p-3 text-start">الإجمالي</th>

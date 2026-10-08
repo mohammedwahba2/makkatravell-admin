@@ -27,15 +27,15 @@ async function toggle(p: { id: string; isPublished: boolean }) {
     <UiPageHead title="الرحلات والبرامج" sub="أضف برامج الحج والعمرة وحدّد المواعيد والأسعار">
       <UButton to="/packages/new" icon="i-lucide-plus">برنامج جديد</UButton>
     </UiPageHead>
-    <div class="rise mb-4 flex flex-wrap gap-3 rounded-2xl bg-white p-4 ring ring-brand-200/70">
+    <div class="panel rise mb-4 flex flex-wrap gap-3 p-4">
       <UInput v-model="q" icon="i-lucide-search" placeholder="بحث" class="w-full sm:w-72" />
       <USelect v-model="type" :items="typeItems" class="w-full sm:w-52" />
     </div>
 
     <div v-if="loading" class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3"><USkeleton v-for="i in 6" :key="i" class="h-72 rounded-2xl" /></div>
-    <div v-else-if="!data?.items.length" class="rounded-2xl bg-white p-12 text-center text-brand-500 ring ring-brand-200/70">لا توجد برامج</div>
+    <div v-else-if="!data?.items.length" class="panel p-12 text-center text-brand-500">لا توجد برامج</div>
     <div v-else class="stagger grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-      <article v-for="p in data.items" :key="p.id" class="lift flex flex-col overflow-hidden rounded-2xl bg-white ring ring-brand-200/70">
+      <article v-for="p in data.items" :key="p.id" class="panel lift flex flex-col overflow-hidden">
         <div class="grid h-36 place-items-center bg-brand-100">
           <img v-if="p.coverImage" :src="p.coverImage" alt="" class="size-full object-cover" loading="lazy" />
           <UIcon v-else name="i-lucide-image" class="size-9 text-brand-300" />
