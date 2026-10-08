@@ -38,8 +38,8 @@ const today = greg(), hj = hijri()
 </script>
 
 <template>
-  <div class="min-h-screen bg-brand-100 lg:flex">
-    <aside class="grain sticky top-0 hidden h-screen w-[17rem] shrink-0 bg-brand-950 lg:block">
+  <div class="min-h-screen bg-brand-100">
+    <aside class="grain fixed inset-y-0 start-0 z-30 hidden w-[17rem] bg-brand-950 lg:block">
       <SidebarNav :groups="groups" :is-active="isActive" :user="auth.user.value" />
     </aside>
 
@@ -47,8 +47,8 @@ const today = greg(), hj = hijri()
       <template #body><SidebarNav :groups="groups" :is-active="isActive" :user="auth.user.value" /></template>
     </USlideover>
 
-    <div class="min-w-0 flex-1">
-      <header class="sticky top-0 z-20 flex h-14 items-center justify-between gap-3 border-b hair bg-brand-100/85 px-4 backdrop-blur-md sm:px-6 lg:px-8">
+    <div class="min-w-0 lg:ps-[17rem]">
+      <header class="sticky top-0 z-20 flex h-14 items-center justify-between gap-3 bg-brand-100/90 px-4 backdrop-blur-md sm:px-6 lg:px-8">
         <div class="flex items-center gap-3">
           <UButton class="lg:hidden" color="neutral" variant="ghost" icon="i-lucide-menu" aria-label="القائمة" @click="drawer = true" />
           <div class="hidden items-center gap-2 text-[13px] text-brand-600 sm:flex">

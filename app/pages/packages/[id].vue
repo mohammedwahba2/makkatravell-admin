@@ -103,7 +103,7 @@ async function save() {
           <template #header><div class="flex items-center justify-between"><h2 class="font-extrabold">مواعيد المغادرة والأسعار</h2><UButton color="neutral" variant="outline" icon="i-lucide-plus" size="sm" @click="addDep">موعد</UButton></div></template>
           <p v-if="!f.departures.length" class="text-sm text-brand-500">لا توجد مواعيد. أضف موعدًا ليتمكن العملاء من الحجز بتاريخ محدد.</p>
           <TransitionGroup tag="div" class="space-y-3" enter-active-class="transition duration-300" enter-from-class="opacity-0 -translate-y-2" leave-active-class="transition duration-200" leave-to-class="opacity-0">
-            <div v-for="(d, i) in f.departures" :key="i" class="grid grid-cols-2 items-end gap-3 rounded-xl border border-brand-200 p-3 sm:grid-cols-6">
+            <div v-for="(d, i) in f.departures" :key="i" class="grid grid-cols-2 items-end gap-3 rounded-lg bg-brand-50 p-3 sm:grid-cols-6">
               <UFormField label="التاريخ" class="col-span-2"><UInput v-model="d.date" type="date" required class="w-full" /></UFormField>
               <UFormField label="المقاعد"><UInput v-model.number="d.seatsTotal" type="number" min="1" class="w-full" /></UFormField>
               <UFormField label="ثنائي"><UInput v-model.number="d.priceDouble" type="number" min="0" placeholder="—" class="w-full" /></UFormField>
@@ -128,7 +128,7 @@ async function save() {
         <UCard>
           <template #header><div class="flex items-center justify-between"><h2 class="font-extrabold">البرنامج اليومي</h2><UButton color="neutral" variant="outline" icon="i-lucide-plus" size="sm" @click="addDay">يوم</UButton></div></template>
           <div class="space-y-3">
-            <div v-for="(d, i) in f.itinerary" :key="i" class="grid items-start gap-3 rounded-xl border border-brand-200 p-3 sm:grid-cols-[84px_1fr_auto]">
+            <div v-for="(d, i) in f.itinerary" :key="i" class="grid items-start gap-3 rounded-lg bg-brand-50 p-3 sm:grid-cols-[84px_1fr_auto]">
               <UInput v-model.number="d.day" type="number" min="1" aria-label="رقم اليوم" />
               <div class="space-y-2"><UInput v-model="d.title" placeholder="عنوان اليوم" class="w-full" /><UTextarea v-model="d.text" :rows="2" placeholder="التفاصيل" class="w-full" /></div>
               <UButton color="error" variant="soft" icon="i-lucide-trash-2" aria-label="حذف اليوم" @click="f.itinerary.splice(i, 1)" />

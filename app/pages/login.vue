@@ -46,7 +46,7 @@ const arches = Array.from({ length: 9 }, (_, i) => ({ w: 34 + i * 30, h: 120 + i
         <circle cx="350" cy="148" r="3" fill="#E8DCCB" class="pulse-dot" />
       </svg>
       <div class="relative z-10 flex h-full flex-col justify-between p-14">
-        <div class="rise flex items-center gap-3"><img src="/logo-mark.png" alt="" class="size-12 rounded-md bg-white object-contain p-1.5" /><div class="leading-tight"><p class="text-lg font-extrabold text-white">مكة للسياحة</p><p class="text-[11px] tracking-[.18em] text-brand-300">MAKKA TRAVEL · دمياط</p></div></div>
+        <div class="rise flex items-center gap-3"><img src="/logo-mark.png" alt="" class="h-14 w-auto object-contain drop-shadow-[0_2px_8px_rgba(0,0,0,.4)]" /><div class="leading-tight"><p class="text-lg font-extrabold text-white">مكة للسياحة</p><p class="text-[11px] tracking-[.18em] text-brand-300">MAKKA TRAVEL · دمياط</p></div></div>
         <div class="stagger max-w-md">
           <p class="eyebrow mb-4 !text-brand-300">لوحة الإدارة</p>
           <h2 class="text-[46px] font-extrabold leading-[1.2] text-white">رحلات الحج والعمرة،<br /><span class="text-brand-300">تحت إدارتك.</span></h2>
@@ -58,7 +58,7 @@ const arches = Array.from({ length: 9 }, (_, i) => ({ w: 34 + i * 30, h: 120 + i
     <!-- form side -->
     <div class="flex items-center justify-center px-6 py-12 sm:px-12">
       <form class="rise w-full max-w-[22rem]" @submit.prevent="submit">
-        <img src="/logo-mark.png" alt="" class="mb-8 size-12 rounded-md bg-white object-contain p-1.5 lg:hidden" />
+        <img src="/logo-mark.png" alt="" class="mb-8 h-16 w-auto object-contain lg:hidden" />
         <p class="eyebrow mb-3">تسجيل الدخول</p>
         <h1 class="text-[34px] font-extrabold leading-tight tracking-tight text-brand-950">أهلًا بعودتك</h1>
         <p class="mb-9 mt-2 text-[15px] text-brand-600">أدخل بيانات حساب الإدارة للمتابعة.</p>

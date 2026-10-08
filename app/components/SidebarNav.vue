@@ -5,7 +5,7 @@ defineProps<{ groups: { title: string; items: NavItem[] }[]; isActive: (to: stri
 <template>
   <div class="flex h-full flex-col">
     <NuxtLink to="/" class="flex items-center gap-3 px-5 pb-5 pt-6">
-      <img src="/logo-mark.png" alt="" class="size-10 rounded-md bg-white object-contain p-1" />
+      <img src="/logo-mark.png" alt="" class="h-12 w-auto object-contain drop-shadow-[0_2px_6px_rgba(0,0,0,.35)]" />
       <div class="leading-tight"><p class="text-[17px] font-extrabold text-white">مكة للسياحة</p><p class="text-[11px] tracking-wide text-brand-300">MAKKA TRAVEL · CONSOLE</p></div>
     </NuxtLink>
 
@@ -25,7 +25,7 @@ defineProps<{ groups: { title: string; items: NavItem[] }[]; isActive: (to: stri
       </div>
     </nav>
 
-    <div v-if="user" class="m-3 flex items-center gap-3 rounded-md border border-white/10 bg-white/5 p-3">
+    <div v-if="user" class="m-3 flex items-center gap-3 rounded-md bg-white/[.06] p-3">
       <span class="grid size-9 shrink-0 place-items-center rounded bg-brand-500 text-sm font-bold text-white">{{ (user.name || '؟').slice(0, 1) }}</span>
       <div class="min-w-0 leading-tight"><p class="truncate text-sm font-bold text-white">{{ user.name }}</p><p class="num truncate text-[11px] text-brand-300" dir="ltr">{{ user.email }}</p></div>
     </div>

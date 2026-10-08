@@ -6,16 +6,23 @@ const xs = (i: number) => PL + (i * (W - PL - PR)) / Math.max(1, props.points.le
 const ys = (v: number) => PT + (1 - v / max.value) * (H - PT - PB)
 const pts = computed(() => props.points.map((p, i) => ({ x: xs(i), y: ys(p.value) })))
 
-// monotone-ish smoothing (Catmull-Rom -> cubic bezier), clamped so the curve never dips below the baseline
+// monotone cubic interpolation (Fritsch–Carlson): smooth, never overshoots the data
 const line = computed(() => {
   const p = pts.value
-  if (p.length < 2) return ''
-  const at = (i: number) => p[Math.max(0, Math.min(p.length - 1, i))]!
-  let d = `M${at(0).x},${at(0).y}`
-  for (let i = 0; i < p.length - 1; i++) {
-    const p0 = at(i - 1), p1 = at(i), p2 = at(i + 1), p3 = at(i + 2)
-    const c1y = Math.min(H - PB, p1.y + (p2.y - p0.y) / 6), c2y = Math.min(H - PB, p2.y - (p3.y - p1.y) / 6)
-    d += ` C${p1.x + (p2.x - p0.x) / 6},${c1y} ${p2.x - (p3.x - p1.x) / 6},${c2y} ${p2.x},${p2.y}`
+  const n = p.length
+  if (n < 2) return ''
+  const dx = (i: number) => p[i + 1]!.x - p[i]!.x
+  const sl = Array.from({ length: n - 1 }, (_, i) => (p[i + 1]!.y - p[i]!.y) / dx(i))
+  const m = Array.from({ length: n }, (_, i) => (i === 0 ? sl[0]! : i === n - 1 ? sl[n - 2]! : sl[i - 1]! * sl[i]! <= 0 ? 0 : (sl[i - 1]! + sl[i]!) / 2))
+  for (let i = 0; i < n - 1; i++) {
+    if (sl[i] === 0) { m[i] = 0; m[i + 1] = 0; continue }
+    const a = m[i]! / sl[i]!, b = m[i + 1]! / sl[i]!, h = a * a + b * b
+    if (h > 9) { const t = 3 / Math.sqrt(h); m[i] = t * a * sl[i]!; m[i + 1] = t * b * sl[i]! }
+  }
+  let d = `M${p[0]!.x},${p[0]!.y}`
+  for (let i = 0; i < n - 1; i++) {
+    const h = dx(i) / 3
+    d += ` C${p[i]!.x + h},${p[i]!.y + m[i]! * h} ${p[i + 1]!.x - h},${p[i + 1]!.y - m[i + 1]! * h} ${p[i + 1]!.x},${p[i + 1]!.y}`
   }
   return d
 })
