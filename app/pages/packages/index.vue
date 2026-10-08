@@ -10,7 +10,7 @@ const qd = refDebounced(q, 350)
 const { data, refresh, status } = useAsyncData('admin-packages', () => api('/admin/packages', { query: { page: page.value, limit: 12, type: type.value === 'all' ? undefined : type.value, q: qd.value || undefined } }),
   { watch: [page, type, qd], server: false })
 watch([type, qd], () => { page.value = 1 })
-const typeItems = [{ label: 'كل الأنواع', value: 'all' }, ...Object.entries(PACKAGE_TYPES).map(([value, label]) => ({ label, value }))]
+const chips = [{ label: 'الكل', value: 'all' }, ...Object.entries(PACKAGE_TYPES).map(([value, label]) => ({ label, value }))]
 const loading = computed(() => status.value === 'pending' && !data.value)
 
 async function remove(p: { id: string; title: string }) {
@@ -27,10 +27,7 @@ async function toggle(p: { id: string; isPublished: boolean }) {
     <UiPageHead title="الرحلات والبرامج" sub="أضف برامج الحج والعمرة وحدّد المواعيد والأسعار">
       <UButton to="/packages/new" icon="i-lucide-plus">برنامج جديد</UButton>
     </UiPageHead>
-    <div class="panel rise mb-4 flex flex-wrap gap-3 p-4">
-      <UInput v-model="q" icon="i-lucide-search" placeholder="بحث" class="w-full sm:w-72" />
-      <USelect v-model="type" :items="typeItems" class="w-full sm:w-52" />
-    </div>
+    <FilterBar v-model:q="q" v-model:chip="type" placeholder="ابحث عن برنامج…" :chips="chips" :total="data?.total" unit="برنامج" />
 
     <div v-if="loading" class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3"><USkeleton v-for="i in 6" :key="i" class="h-72 rounded-2xl" /></div>
     <div v-else-if="!data?.items.length" class="panel p-12 text-center text-brand-500">لا توجد برامج</div>

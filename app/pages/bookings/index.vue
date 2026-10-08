@@ -9,17 +9,18 @@ const qd = refDebounced(q, 350)
 const { data, status: st } = useAsyncData('bookings', () => api('/admin/bookings', { query: { page: page.value, limit: 15, status: status.value === 'all' ? undefined : status.value, q: qd.value || undefined } }),
   { watch: [page, status, qd], server: false })
 watch([status, qd], () => { page.value = 1 })
-const statusItems = [{ label: 'كل الحالات', value: 'all' }, ...Object.entries(BOOKING_STATUS).map(([value, label]) => ({ label, value }))]
+const { data: stats } = useAsyncData('stats', () => api('/admin/stats'), { server: false })
+const chips = computed(() => {
+  const by = (stats.value?.byStatus ?? {}) as Record<string, number>
+  return [{ label: 'الكل', value: 'all', count: stats.value?.bookings }, ...Object.entries(BOOKING_STATUS).map(([value, label]) => ({ label, value, count: by[value] ?? 0 }))]
+})
 const loading = computed(() => st.value === 'pending' && !data.value)
 </script>
 
 <template>
   <div>
     <UiPageHead title="الحجوزات" sub="تابع طلبات الحجز وأكّدها" />
-    <div class="panel rise mb-4 flex flex-wrap gap-3 p-4">
-      <UInput v-model="q" icon="i-lucide-search" placeholder="بحث بالاسم أو الهاتف أو رقم الحجز" class="w-full sm:w-80" />
-      <USelect v-model="status" :items="statusItems" class="w-full sm:w-52" />
-    </div>
+    <FilterBar v-model:q="q" v-model:chip="status" placeholder="بحث بالاسم أو الهاتف أو رقم الحجز" :chips="chips" :total="data?.total" unit="حجز" />
 
     <div class="panel rise overflow-x-auto" style="animation-delay:.08s">
       <table class="w-full min-w-[820px] text-sm">
