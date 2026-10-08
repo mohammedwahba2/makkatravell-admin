@@ -1,0 +1,47 @@
+@import "tailwindcss";
+@import "@nuxt/ui";
+
+@theme static {
+  --font-sans: 'Cairo', ui-sans-serif, system-ui, sans-serif;
+  --color-brand-50: #FBF8F3;
+  --color-brand-100: #F5EFE7;
+  --color-brand-200: #E8DCCB;
+  --color-brand-300: #D9B79A;
+  --color-brand-400: #C98F68;
+  --color-brand-500: #A56F4D;
+  --color-brand-600: #85573B;
+  --color-brand-700: #5C3A28;
+  --color-brand-800: #472C1F;
+  --color-brand-900: #3B2418;
+  --color-brand-950: #241811;
+}
+
+:root { --ui-primary: var(--ui-color-primary-700); --ui-radius: 0.75rem; }
+html { background: var(--color-brand-100); }
+body { margin: 0; color: var(--color-brand-950); -webkit-font-smoothing: antialiased; }
+::selection { background: var(--color-brand-200); }
+
+/* ---- page & layout transitions ---- */
+.page-enter-active, .page-leave-active { transition: opacity .28s cubic-bezier(.4,0,.2,1), transform .28s cubic-bezier(.4,0,.2,1), filter .28s; }
+.page-enter-from { opacity: 0; transform: translateY(14px); filter: blur(3px); }
+.page-leave-to { opacity: 0; transform: translateY(-6px); filter: blur(2px); }
+.layout-enter-active, .layout-leave-active { transition: opacity .35s ease, transform .35s ease; }
+.layout-enter-from { opacity: 0; transform: scale(.985); }
+.layout-leave-to { opacity: 0; transform: scale(1.01); }
+
+/* ---- entrance helpers ---- */
+@keyframes rise { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
+@keyframes float { 0%,100% { transform: translate3d(0,0,0) scale(1); } 50% { transform: translate3d(30px,-24px,0) scale(1.08); } }
+@keyframes shimmer { to { background-position: -200% 0; } }
+.rise { animation: rise .6s cubic-bezier(.2,.8,.2,1) both; }
+.stagger > * { animation: rise .55s cubic-bezier(.2,.8,.2,1) both; }
+.stagger > *:nth-child(1) { animation-delay: .02s; } .stagger > *:nth-child(2) { animation-delay: .07s; }
+.stagger > *:nth-child(3) { animation-delay: .12s; } .stagger > *:nth-child(4) { animation-delay: .17s; }
+.stagger > *:nth-child(5) { animation-delay: .22s; } .stagger > *:nth-child(6) { animation-delay: .27s; }
+.stagger > *:nth-child(n+7) { animation-delay: .32s; }
+.lift { transition: transform .25s cubic-bezier(.2,.8,.2,1), box-shadow .25s; }
+.lift:hover { transform: translateY(-3px); box-shadow: 0 14px 30px -14px rgb(59 36 24 / .28); }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+}

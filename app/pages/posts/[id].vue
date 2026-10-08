@@ -1,6 +1,6 @@
 <script setup lang="ts">
 const { api } = useApi()
-const toast = useToast()
+const notify = useNotify()
 const id = useRoute().params.id as string
 const isNew = id === 'new'
 useHead({ title: isNew ? 'مقال جديد' : 'تعديل مقال' })
@@ -16,33 +16,40 @@ async function save() {
     category: f.category, isPublished: f.isPublished, seoTitle: f.seoTitle || undefined, seoDescription: f.seoDescription || undefined }
   try {
     await api(isNew ? '/admin/posts' : `/admin/posts/${id}`, { method: isNew ? 'POST' : 'PATCH', body })
-    toast.ok('تم الحفظ'); await navigateTo('/posts')
-  } catch (e) { toast.err(errMsg(e)) } finally { saving.value = false }
+    notify.ok('تم الحفظ'); await navigateTo('/posts')
+  } catch (e) { notify.err(errMsg(e)) } finally { saving.value = false }
 }
 </script>
 <template>
   <form @submit.prevent="save">
     <UiPageHead :title="isNew ? 'مقال جديد' : 'تعديل المقال'">
-      <NuxtLink to="/posts" class="btn-ghost">إلغاء</NuxtLink><button class="btn-primary" :disabled="saving">{{ saving ? 'جاري الحفظ…' : 'حفظ' }}</button>
+      <UButton to="/posts" color="neutral" variant="outline">إلغاء</UButton>
+      <UButton type="submit" :loading="saving" icon="i-lucide-save">حفظ</UButton>
     </UiPageHead>
     <div class="grid gap-4 lg:grid-cols-3">
-      <section class="card p-5 lg:col-span-2 space-y-4">
-        <div><label class="label">العنوان *</label><input v-model="f.title" class="input" required maxlength="200" /></div>
-        <div><label class="label">مقدمة قصيرة *</label><textarea v-model="f.excerpt" rows="2" class="input" required maxlength="400" /></div>
-        <div><label class="label">المحتوى * <span class="text-brand-400">(فقرة جديدة بسطر فارغ، وعنوان فرعي بـ ## في بداية السطر)</span></label><textarea v-model="f.content" rows="16" class="input" required /></div>
-      </section>
+      <UCard class="lg:col-span-2">
+        <div class="space-y-4">
+          <UFormField label="العنوان" required><UInput v-model="f.title" required maxlength="200" class="w-full" /></UFormField>
+          <UFormField label="مقدمة قصيرة" required><UTextarea v-model="f.excerpt" :rows="2" required maxlength="400" class="w-full" /></UFormField>
+          <UFormField label="المحتوى" required hint="فقرة جديدة بسطر فارغ، وعنوان فرعي بـ ## في بداية السطر"><UTextarea v-model="f.content" :rows="16" required class="w-full" /></UFormField>
+        </div>
+      </UCard>
       <aside class="space-y-4">
-        <section class="card p-5 space-y-4">
-          <label class="flex items-center gap-2 text-sm"><input v-model="f.isPublished" type="checkbox" class="accent-[#A56F4D]" />منشور</label>
-          <div><label class="label">التصنيف</label><input v-model="f.category" class="input" /></div>
-          <ImageUpload v-model="f.coverImage" label="صورة المقال" />
-        </section>
-        <section class="card p-5 space-y-4">
-          <h2 class="font-extrabold">SEO</h2>
-          <div><label class="label">الرابط (slug)</label><input v-model="f.slug" class="input" placeholder="يُولَّد تلقائيًا" /></div>
-          <div><label class="label">عنوان SEO ({{ f.seoTitle.length }}/70)</label><input v-model="f.seoTitle" maxlength="70" class="input" /></div>
-          <div><label class="label">وصف SEO ({{ f.seoDescription.length }}/170)</label><textarea v-model="f.seoDescription" maxlength="170" rows="3" class="input" /></div>
-        </section>
+        <UCard>
+          <div class="space-y-4">
+            <USwitch v-model="f.isPublished" label="منشور" />
+            <UFormField label="التصنيف"><UInput v-model="f.category" class="w-full" /></UFormField>
+            <ImageUpload v-model="f.coverImage" label="صورة المقال" />
+          </div>
+        </UCard>
+        <UCard>
+          <template #header><h2 class="font-extrabold">SEO</h2></template>
+          <div class="space-y-4">
+            <UFormField label="الرابط (slug)"><UInput v-model="f.slug" placeholder="يُولَّد تلقائيًا" class="w-full" /></UFormField>
+            <UFormField :label="`عنوان SEO (${f.seoTitle.length}/70)`"><UInput v-model="f.seoTitle" maxlength="70" class="w-full" /></UFormField>
+            <UFormField :label="`وصف SEO (${f.seoDescription.length}/170)`"><UTextarea v-model="f.seoDescription" maxlength="170" :rows="3" class="w-full" /></UFormField>
+          </div>
+        </UCard>
       </aside>
     </div>
   </form>

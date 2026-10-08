@@ -1,49 +1,62 @@
 <script setup lang="ts">
 useHead({ title: 'آراء العملاء' })
 const { api } = useApi()
-const toast = useToast()
-const { data, refresh } = await useAsyncData('admin-testimonials', () => api('/admin/testimonials'), { server: false })
+const notify = useNotify()
+const { ask } = useConfirm()
+const { data, refresh, status } = useAsyncData('admin-testimonials', () => api('/admin/testimonials'), { server: false })
+const loading = computed(() => status.value === 'pending' && !data.value)
 const open = ref(false)
+const saving = ref(false)
 const editing = ref<string | null>(null)
-const f = reactive({ name: '', city: '', text: '', rating: 5, isPublished: true })
+const blank = () => ({ name: '', city: '', text: '', rating: 5, isPublished: true })
+const f = reactive(blank())
+const ratingItems = [5, 4, 3, 2, 1].map((n) => ({ label: `${n} ★`, value: n }))
 function edit(x?: any) {
   editing.value = x?.id ?? null
-  Object.assign(f, x ? { name: x.name, city: x.city ?? '', text: x.text, rating: x.rating, isPublished: x.isPublished } : { name: '', city: '', text: '', rating: 5, isPublished: true })
+  Object.assign(f, x ? { name: x.name, city: x.city ?? '', text: x.text, rating: x.rating, isPublished: x.isPublished } : blank())
   open.value = true
 }
 async function save() {
-  try { await api(editing.value ? `/admin/testimonials/${editing.value}` : '/admin/testimonials', { method: editing.value ? 'PATCH' : 'POST', body: { ...f, city: f.city || undefined } }); toast.ok('تم الحفظ'); open.value = false; await refresh() }
-  catch (e) { toast.err(errMsg(e)) }
+  saving.value = true
+  try { await api(editing.value ? `/admin/testimonials/${editing.value}` : '/admin/testimonials', { method: editing.value ? 'PATCH' : 'POST', body: { ...f, city: f.city || undefined } }); notify.ok('تم الحفظ'); open.value = false; await refresh() }
+  catch (e) { notify.err(errMsg(e)) } finally { saving.value = false }
 }
-async function remove(id: string) {
-  if (!confirm('حذف هذا الرأي؟')) return
-  try { await api(`/admin/testimonials/${id}`, { method: 'DELETE' }); await refresh() } catch (e) { toast.err(errMsg(e)) }
+async function remove(x: { id: string; name: string }) {
+  if (!(await ask({ title: 'حذف الرأي', description: `حذف رأي "${x.name}"؟`, confirmLabel: 'حذف', danger: true }))) return
+  try { await api(`/admin/testimonials/${x.id}`, { method: 'DELETE' }); notify.ok('تم الحذف'); await refresh() } catch (e) { notify.err(errMsg(e)) }
 }
 </script>
 <template>
   <div>
-    <UiPageHead title="آراء العملاء"><button class="btn-primary" @click="edit()"><span class="i-lucide-plus" />رأي جديد</button></UiPageHead>
-    <p v-if="!data?.length" class="card p-10 text-center text-brand-500">لا توجد آراء</p>
-    <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-      <article v-for="x in data" :key="x.id" class="card p-5 flex flex-col">
-        <div class="flex text-amber-500 mb-2"><span v-for="n in x.rating" :key="n" class="i-lucide-star" /></div>
-        <p class="text-sm leading-7 flex-1">{{ x.text }}</p>
+    <UiPageHead title="آراء العملاء"><UButton icon="i-lucide-plus" @click="edit()">رأي جديد</UButton></UiPageHead>
+    <div v-if="loading" class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3"><USkeleton v-for="i in 3" :key="i" class="h-44 rounded-2xl" /></div>
+    <p v-else-if="!data?.length" class="rounded-2xl bg-white p-12 text-center text-brand-500 ring ring-brand-200/70">لا توجد آراء</p>
+    <div v-else class="stagger grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+      <article v-for="x in data" :key="x.id" class="lift flex flex-col rounded-2xl bg-white p-5 ring ring-brand-200/70">
+        <div class="mb-2 flex text-amber-500"><UIcon v-for="n in x.rating" :key="n" name="i-lucide-star" class="size-4 fill-current" /></div>
+        <p class="flex-1 text-sm leading-7">{{ x.text }}</p>
         <div class="mt-4 flex items-center justify-between gap-2">
-          <div><p class="font-bold text-sm">{{ x.name }}</p><p class="text-xs text-brand-500">{{ x.city }}</p></div>
-          <div class="flex items-center gap-2"><UiBadge :tone="x.isPublished ? 'ok' : 'warn'">{{ x.isPublished ? 'منشور' : 'مخفي' }}</UiBadge>
-            <button class="btn-ghost !px-3" aria-label="تعديل" @click="edit(x)"><span class="i-lucide-pencil" /></button>
-            <button class="btn-danger !px-3" aria-label="حذف" @click="remove(x.id)"><span class="i-lucide-trash-2" /></button></div>
+          <div><p class="text-sm font-bold">{{ x.name }}</p><p class="text-xs text-brand-500">{{ x.city }}</p></div>
+          <div class="flex items-center gap-1.5">
+            <UBadge :color="x.isPublished ? 'success' : 'warning'" variant="subtle">{{ x.isPublished ? 'منشور' : 'مخفي' }}</UBadge>
+            <UButton color="neutral" variant="outline" size="sm" icon="i-lucide-pencil" aria-label="تعديل" @click="edit(x)" />
+            <UButton color="error" variant="soft" size="sm" icon="i-lucide-trash-2" aria-label="حذف" @click="remove(x)" />
+          </div>
         </div>
       </article>
     </div>
-    <UiModal :open="open" :title="editing ? 'تعديل الرأي' : 'رأي جديد'" @close="open = false">
-      <form class="space-y-4" @submit.prevent="save">
-        <div class="grid grid-cols-2 gap-3"><div><label class="label">الاسم *</label><input v-model="f.name" class="input" required /></div><div><label class="label">المدينة</label><input v-model="f.city" class="input" /></div></div>
-        <div><label class="label">الرأي *</label><textarea v-model="f.text" rows="4" class="input" required maxlength="1000" /></div>
-        <div class="grid grid-cols-2 gap-3"><div><label class="label">التقييم</label><select v-model.number="f.rating" class="input"><option v-for="n in [5,4,3,2,1]" :key="n" :value="n">{{ n }}</option></select></div>
-          <label class="flex items-end gap-2 text-sm pb-2"><input v-model="f.isPublished" type="checkbox" class="accent-[#A56F4D]" />منشور</label></div>
-        <button class="btn-primary w-full">حفظ</button>
-      </form>
-    </UiModal>
+
+    <UModal v-model:open="open" :title="editing ? 'تعديل الرأي' : 'رأي جديد'" :ui="{ content: 'max-w-lg' }">
+      <template #body>
+        <form id="t-form" class="space-y-4" @submit.prevent="save">
+          <div class="grid grid-cols-2 gap-3"><UFormField label="الاسم" required><UInput v-model="f.name" required class="w-full" /></UFormField><UFormField label="المدينة"><UInput v-model="f.city" class="w-full" /></UFormField></div>
+          <UFormField label="الرأي" required><UTextarea v-model="f.text" :rows="4" required maxlength="1000" class="w-full" /></UFormField>
+          <div class="grid grid-cols-2 items-end gap-3"><UFormField label="التقييم"><USelect v-model="f.rating" :items="ratingItems" class="w-full" /></UFormField><USwitch v-model="f.isPublished" label="منشور" class="pb-2" /></div>
+        </form>
+      </template>
+      <template #footer>
+        <div class="flex w-full justify-end gap-2"><UButton color="neutral" variant="outline" @click="open = false">إلغاء</UButton><UButton type="submit" form="t-form" :loading="saving">حفظ</UButton></div>
+      </template>
+    </UModal>
   </div>
 </template>

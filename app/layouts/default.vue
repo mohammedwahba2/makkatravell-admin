@@ -1,8 +1,9 @@
 <script setup lang="ts">
 const auth = useAuth()
 const route = useRoute()
-const open = ref(false)
-watch(() => route.fullPath, () => { open.value = false })
+const { ask } = useConfirm()
+const drawer = ref(false)
+watch(() => route.fullPath, () => { drawer.value = false })
 
 const nav = [
   { to: '/', label: 'لوحة التحكم', icon: 'i-lucide-layout-dashboard' },
@@ -14,41 +15,44 @@ const nav = [
   { to: '/inquiries', label: 'رسائل التواصل', icon: 'i-lucide-inbox' },
   { to: '/settings', label: 'إعدادات الموقع', icon: 'i-lucide-settings' },
 ]
-const active = (to: string) => (to === '/' ? route.path === '/' : route.path.startsWith(to))
-const logout = async () => {
-  try { await useApi().api('/auth/logout', { method: 'POST' }) } catch { /* token may already be dead */ }
+const isActive = (to: string) => (to === '/' ? route.path === '/' : route.path.startsWith(to))
+const current = computed(() => nav.find((n) => isActive(n.to))?.label ?? 'لوحة التحكم')
+
+async function logout() {
+  if (!(await ask({ title: 'تسجيل الخروج', description: 'هل تريد تسجيل الخروج من لوحة التحكم؟', confirmLabel: 'خروج', danger: true }))) return
+  try { await useApi().api('/auth/logout', { method: 'POST' }) } catch { /* token may already be invalid */ }
   auth.clear(); await navigateTo('/login')
 }
+const menu = computed(() => [[{ label: auth.user.value?.email ?? '', type: 'label' as const }], [{ label: 'تسجيل الخروج', icon: 'i-lucide-log-out', color: 'error' as const, onSelect: logout }]])
 </script>
 
 <template>
-  <div class="min-h-screen lg:flex">
-    <div v-if="open" class="fixed inset-0 bg-brand-ink/40 z-30 lg:hidden" @click="open = false" />
-    <aside class="fixed lg:sticky top-0 z-40 h-screen w-64 shrink-0 bg-brand-900 text-brand-100 flex flex-col transition-transform lg:translate-x-0"
-      :class="open ? 'translate-x-0' : 'translate-x-full'">
-      <div class="px-5 pt-6 pb-5 flex items-center gap-3 border-b border-white/10">
-        <img src="/logo-mark.png" alt="" class="h-11 w-11 rounded-xl bg-white object-contain p-1" />
-        <div><p class="font-extrabold leading-tight">مكة للسياحة</p><p class="text-xs text-brand-300">لوحة الإدارة</p></div>
-      </div>
-      <nav class="flex-1 overflow-y-auto p-3 space-y-1">
-        <NuxtLink v-for="n in nav" :key="n.to" :to="n.to"
-          class="flex items-center gap-3 rounded-xl px-3.5 h-11 text-sm font-semibold transition"
-          :class="active(n.to) ? 'bg-brand-500 text-white' : 'text-brand-200 hover:bg-white/8'">
-          <span :class="n.icon" class="text-lg" />{{ n.label }}
-        </NuxtLink>
-      </nav>
-      <div class="p-3 border-t border-white/10">
-        <div class="px-3 py-2 text-xs text-brand-300 truncate">{{ auth.user.value?.email }}</div>
-        <button class="w-full flex items-center gap-3 rounded-xl px-3.5 h-11 text-sm font-semibold text-brand-200 hover:bg-white/8 cursor-pointer" @click="logout">
-          <span class="i-lucide-log-out text-lg" />تسجيل الخروج
-        </button>
-      </div>
+  <div class="min-h-screen bg-brand-100 lg:flex">
+    <!-- desktop sidebar -->
+    <aside class="hidden lg:flex sticky top-0 h-screen w-72 shrink-0 flex-col bg-brand-900 text-brand-100">
+      <SidebarNav :nav="nav" :is-active="isActive" />
     </aside>
 
+    <!-- mobile drawer -->
+    <USlideover v-model:open="drawer" side="right" title="القائمة" :ui="{ content: 'max-w-72 bg-brand-900 text-brand-100', header: 'hidden', body: 'p-0' }">
+      <template #body><div class="flex h-full flex-col"><SidebarNav :nav="nav" :is-active="isActive" /></div></template>
+    </USlideover>
+
     <div class="flex-1 min-w-0">
-      <header class="lg:hidden sticky top-0 z-20 h-14 bg-brand-900 text-white flex items-center justify-between px-4">
-        <button class="p-2 -ms-2 cursor-pointer" aria-label="القائمة" @click="open = true"><span class="i-lucide-menu text-2xl" /></button>
-        <span class="font-bold">مكة للسياحة</span><span class="w-8" />
+      <header class="sticky top-0 z-20 h-16 px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-3 bg-brand-100/80 backdrop-blur-md border-b border-brand-200/60">
+        <div class="flex items-center gap-3">
+          <UButton class="lg:hidden" color="neutral" variant="ghost" icon="i-lucide-menu" aria-label="القائمة" @click="drawer = true" />
+          <span class="font-bold text-brand-800">{{ current }}</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <UButton color="neutral" variant="ghost" icon="i-lucide-external-link" to="https://makkatravell.com" target="_blank" class="hidden sm:inline-flex">الموقع</UButton>
+          <UDropdownMenu :items="menu" :content="{ align: 'start' }">
+            <UButton color="neutral" variant="outline" class="rounded-full ps-1.5" trailing-icon="i-lucide-chevron-down">
+              <UAvatar :alt="auth.user.value?.name" size="xs" :ui="{ root: 'bg-brand-700 text-white' }" />
+              <span class="hidden sm:inline">{{ auth.user.value?.name }}</span>
+            </UButton>
+          </UDropdownMenu>
+        </div>
       </header>
       <main class="p-4 sm:p-6 lg:p-8 max-w-[1400px] mx-auto"><slot /></main>
     </div>

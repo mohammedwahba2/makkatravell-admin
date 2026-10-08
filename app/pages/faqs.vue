@@ -1,49 +1,60 @@
 <script setup lang="ts">
 useHead({ title: 'الأسئلة الشائعة' })
 const { api } = useApi()
-const toast = useToast()
-const { data, refresh } = await useAsyncData('admin-faqs', () => api('/admin/faqs'), { server: false })
+const notify = useNotify()
+const { ask } = useConfirm()
+const { data, refresh, status } = useAsyncData('admin-faqs', () => api('/admin/faqs'), { server: false })
+const loading = computed(() => status.value === 'pending' && !data.value)
 const open = ref(false)
+const saving = ref(false)
 const editing = ref<string | null>(null)
-const f = reactive({ question: '', answer: '', category: 'general', sortOrder: 0, isPublished: true })
+const blank = () => ({ question: '', answer: '', category: 'general', sortOrder: 0, isPublished: true })
+const f = reactive(blank())
 function edit(x?: any) {
   editing.value = x?.id ?? null
-  Object.assign(f, x ? { question: x.question, answer: x.answer, category: x.category, sortOrder: x.sortOrder, isPublished: x.isPublished } : { question: '', answer: '', category: 'general', sortOrder: 0, isPublished: true })
+  Object.assign(f, x ? { question: x.question, answer: x.answer, category: x.category, sortOrder: x.sortOrder, isPublished: x.isPublished } : blank())
   open.value = true
 }
 async function save() {
-  try { await api(editing.value ? `/admin/faqs/${editing.value}` : '/admin/faqs', { method: editing.value ? 'PATCH' : 'POST', body: { ...f } }); toast.ok('تم الحفظ'); open.value = false; await refresh() }
-  catch (e) { toast.err(errMsg(e)) }
+  saving.value = true
+  try { await api(editing.value ? `/admin/faqs/${editing.value}` : '/admin/faqs', { method: editing.value ? 'PATCH' : 'POST', body: { ...f } }); notify.ok('تم الحفظ'); open.value = false; await refresh() }
+  catch (e) { notify.err(errMsg(e)) } finally { saving.value = false }
 }
-async function remove(id: string) {
-  if (!confirm('حذف هذا السؤال؟')) return
-  try { await api(`/admin/faqs/${id}`, { method: 'DELETE' }); await refresh() } catch (e) { toast.err(errMsg(e)) }
+async function remove(x: { id: string; question: string }) {
+  if (!(await ask({ title: 'حذف السؤال', description: `حذف "${x.question}"؟`, confirmLabel: 'حذف', danger: true }))) return
+  try { await api(`/admin/faqs/${x.id}`, { method: 'DELETE' }); notify.ok('تم الحذف'); await refresh() } catch (e) { notify.err(errMsg(e)) }
 }
 </script>
 <template>
   <div>
     <UiPageHead title="الأسئلة الشائعة" sub="تظهر في صفحة الأسئلة وتدعم نتائج جوجل (FAQ schema)">
-      <button class="btn-primary" @click="edit()"><span class="i-lucide-plus" />سؤال جديد</button>
+      <UButton icon="i-lucide-plus" @click="edit()">سؤال جديد</UButton>
     </UiPageHead>
-    <div class="card divide-y divide-brand-100">
-      <p v-if="!data?.length" class="p-10 text-center text-brand-500">لا توجد أسئلة</p>
-      <div v-for="x in data" :key="x.id" class="p-4 flex items-start gap-3">
-        <div class="flex-1 min-w-0"><p class="font-bold">{{ x.question }}</p><p class="text-sm text-brand-500 mt-1 line-clamp-2">{{ x.answer }}</p></div>
-        <UiBadge :tone="x.isPublished ? 'ok' : 'warn'">{{ x.isPublished ? 'منشور' : 'مخفي' }}</UiBadge>
-        <button class="btn-ghost" aria-label="تعديل" @click="edit(x)"><span class="i-lucide-pencil" /></button>
-        <button class="btn-danger" aria-label="حذف" @click="remove(x.id)"><span class="i-lucide-trash-2" /></button>
+    <div class="rise divide-y divide-brand-100 rounded-2xl bg-white ring ring-brand-200/70">
+      <div v-if="loading" class="space-y-3 p-4"><USkeleton v-for="i in 4" :key="i" class="h-14" /></div>
+      <p v-else-if="!data?.length" class="p-12 text-center text-brand-500">لا توجد أسئلة</p>
+      <div v-for="x in data" :key="x.id" class="flex items-start gap-3 p-4 transition hover:bg-brand-50/60">
+        <div class="min-w-0 flex-1"><p class="font-bold">{{ x.question }}</p><p class="mt-1 line-clamp-2 text-sm text-brand-500">{{ x.answer }}</p></div>
+        <UBadge :color="x.isPublished ? 'success' : 'warning'" variant="subtle">{{ x.isPublished ? 'منشور' : 'مخفي' }}</UBadge>
+        <UButton color="neutral" variant="outline" icon="i-lucide-pencil" aria-label="تعديل" @click="edit(x)" />
+        <UButton color="error" variant="soft" icon="i-lucide-trash-2" aria-label="حذف" @click="remove(x)" />
       </div>
     </div>
-    <UiModal :open="open" :title="editing ? 'تعديل السؤال' : 'سؤال جديد'" @close="open = false">
-      <form class="space-y-4" @submit.prevent="save">
-        <div><label class="label">السؤال *</label><input v-model="f.question" class="input" required /></div>
-        <div><label class="label">الإجابة *</label><textarea v-model="f.answer" rows="5" class="input" required /></div>
-        <div class="grid grid-cols-2 gap-3">
-          <div><label class="label">الترتيب</label><input v-model.number="f.sortOrder" type="number" class="input" /></div>
-          <label class="flex items-end gap-2 text-sm pb-2"><input v-model="f.isPublished" type="checkbox" class="accent-[#A56F4D]" />منشور</label>
-        </div>
-        <button class="btn-primary w-full">حفظ</button>
-      </form>
-    </UiModal>
+
+    <UModal v-model:open="open" :title="editing ? 'تعديل السؤال' : 'سؤال جديد'" :ui="{ content: 'max-w-lg' }">
+      <template #body>
+        <form id="faq-form" class="space-y-4" @submit.prevent="save">
+          <UFormField label="السؤال" required><UInput v-model="f.question" required class="w-full" /></UFormField>
+          <UFormField label="الإجابة" required><UTextarea v-model="f.answer" :rows="5" required class="w-full" /></UFormField>
+          <div class="grid grid-cols-2 items-end gap-3">
+            <UFormField label="الترتيب"><UInput v-model.number="f.sortOrder" type="number" class="w-full" /></UFormField>
+            <USwitch v-model="f.isPublished" label="منشور" class="pb-2" />
+          </div>
+        </form>
+      </template>
+      <template #footer>
+        <div class="flex w-full justify-end gap-2"><UButton color="neutral" variant="outline" @click="open = false">إلغاء</UButton><UButton type="submit" form="faq-form" :loading="saving">حفظ</UButton></div>
+      </template>
+    </UModal>
   </div>
 </template>
