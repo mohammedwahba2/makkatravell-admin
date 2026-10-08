@@ -45,12 +45,13 @@ const arches = Array.from({ length: 9 }, (_, i) => ({ w: 34 + i * 30, h: 120 + i
         </g>
         <circle cx="350" cy="148" r="3" fill="#E8DCCB" class="pulse-dot" />
       </svg>
+      <div class="pointer-events-none absolute inset-x-0 bottom-0 z-[5] h-[55%] bg-gradient-to-t from-brand-950 via-brand-950/70 to-transparent" />
       <div class="relative z-10 flex h-full flex-col justify-between p-14">
         <div class="rise flex items-center gap-3"><img src="/logo-mark.png" alt="" class="h-14 w-auto object-contain drop-shadow-[0_2px_8px_rgba(0,0,0,.4)]" /><div class="leading-tight"><p class="text-lg font-extrabold text-white">مكة للسياحة</p><p class="text-[11px] tracking-[.18em] text-brand-300">MAKKA TRAVEL · دمياط</p></div></div>
-        <div class="stagger max-w-md">
+        <div class="stagger relative max-w-xl">
           <p class="eyebrow mb-4 !text-brand-300">لوحة الإدارة</p>
-          <h2 class="text-[46px] font-extrabold leading-[1.2] text-white">رحلات الحج والعمرة،<br /><span class="text-brand-300">تحت إدارتك.</span></h2>
-          <p class="mt-5 leading-8 text-brand-200/80">تابع الحجوزات، وحدّث البرامج والمواعيد والأسعار، ورد على عملائك من مكان واحد.</p>
+          <h2 class="text-[50px] font-extrabold leading-[1.25] text-white">ركّز في عمرتك،<br /><span class="text-brand-300">واترك لنا شرف خدمتك.</span></h2>
+          <p class="mt-5 max-w-md leading-8 text-brand-200/80">تابع الحجوزات، وحدّث البرامج والمواعيد والأسعار، ورد على عملائك من مكان واحد.</p>
         </div>
       </div>
     </div>
