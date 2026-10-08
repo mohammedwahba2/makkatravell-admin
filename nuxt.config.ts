@@ -4,7 +4,7 @@ export default defineNuxtConfig({
   devtools: { enabled: false },
   modules: ['@unocss/nuxt'],
   css: ['~/assets/main.css'],
-  runtimeConfig: { public: { apiBase: 'http://localhost:4000/api' } },
+  runtimeConfig: { public: { apiBase: 'https://api.makkatravell.com/api' } },
   app: {
     head: {
       htmlAttrs: { lang: 'ar', dir: 'rtl' },
