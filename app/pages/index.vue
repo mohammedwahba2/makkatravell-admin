@@ -30,7 +30,7 @@ watch(s, () => { grown.value = false; nextTick(() => requestAnimationFrame(() =>
           <div v-for="(d, i) in s.daily" :key="d.day" class="flex h-full min-w-0 flex-1 flex-col items-center justify-end gap-1" :title="`${fdate(d.day)}: ${d.count}`">
             <span class="text-[10px] text-brand-500">{{ d.count }}</span>
             <div class="w-full rounded-t-md bg-gradient-to-t from-brand-600 to-brand-400 transition-all duration-700 ease-out"
-              :style="{ height: grown ? `${(Number(d.count) / max) * 100}%` : '0%', minHeight: grown ? '4px' : '0', transitionDelay: `${i * 40}ms` }" />
+              :style="{ height: grown ? `${(Number(d.count) / max) * 100}%` : '0%', minHeight: grown ? '4px' : '0', transitionDelay: `${Number(i) * 40}ms` }" />
           </div>
         </div>
       </section>
