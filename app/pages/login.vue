@@ -8,15 +8,28 @@ const password = ref('')
 const show = ref(false)
 const busy = ref(false)
 const error = ref('')
+const step = ref<'login' | '2fa'>('login')
+const ticket = ref('')
+const otp = ref('')
 
+async function finish(r: { accessToken: string; refreshToken: string; user: AuthUser }) {
+  if (!['ADMIN', 'EDITOR'].includes(r.user.role)) { error.value = 'هذا الحساب لا يملك صلاحية الدخول للوحة الإدارة'; return }
+  auth.save(r)
+  await navigateTo('/')
+}
 async function submit() {
   busy.value = true; error.value = ''
   try {
-    const r = await $fetch<{ accessToken: string; refreshToken: string; user: AuthUser }>(`${base}/auth/login`, { method: 'POST', body: { email: email.value, password: password.value } })
-    if (!['ADMIN', 'EDITOR'].includes(r.user.role)) { error.value = 'هذا الحساب لا يملك صلاحية الدخول للوحة الإدارة'; return }
-    auth.save(r)
-    await navigateTo('/')
-  } catch (e) { error.value = errMsg(e) } finally { busy.value = false }
+    if (step.value === '2fa') {
+      await finish(await $fetch<any>(`${base}/auth/login/2fa`, { method: 'POST', body: { ticket: ticket.value, code: otp.value.trim() } }))
+    } else {
+      const r = await $fetch<any>(`${base}/auth/login`, { method: 'POST', body: { email: email.value, password: password.value } })
+      if (r.requires2fa) { ticket.value = r.ticket; step.value = '2fa'; otp.value = '' } else await finish(r)
+    }
+  } catch (e) {
+    error.value = errMsg(e)
+    if (step.value === '2fa' && /انتهت/.test(error.value)) { step.value = 'login'; password.value = '' }
+  } finally { busy.value = false }
 }
 
 // nested pointed arches (mihrab motif), drawn as SVG
@@ -64,6 +77,11 @@ const arches = Array.from({ length: 9 }, (_, i) => ({ w: 34 + i * 30, h: 120 + i
         <h1 class="text-[34px] font-extrabold leading-tight tracking-tight text-brand-950">أهلًا بعودتك</h1>
         <p class="mb-9 mt-2 text-[15px] text-brand-600">أدخل بيانات حساب الإدارة للمتابعة.</p>
 
+        <template v-if="step === '2fa'">
+          <p class="mb-5 flex items-start gap-2 rounded-lg bg-brand-100 px-3 py-2.5 text-sm leading-6 text-brand-800"><UIcon name="i-lucide-shield-check" class="mt-0.5 size-4 shrink-0" />أدخل الرمز المكوّن من 6 أرقام من تطبيق المصادقة (أو كود استرداد).</p>
+          <UFormField label="رمز التحقق" class="mb-6"><UInput v-model="otp" required autofocus autocomplete="one-time-code" inputmode="text" dir="ltr" size="xl" placeholder="000000" class="w-full" /></UFormField>
+        </template>
+        <template v-else>
         <UFormField label="البريد الإلكتروني" class="mb-5">
           <UInput v-model="email" type="email" required autocomplete="username" dir="ltr" size="xl" placeholder="name@makkatravell.com" class="w-full" />
         </UFormField>
@@ -72,12 +90,14 @@ const arches = Array.from({ length: 9 }, (_, i) => ({ w: 34 + i * 30, h: 120 + i
             <template #trailing><UButton color="neutral" variant="link" size="sm" :icon="show ? 'i-lucide-eye-off' : 'i-lucide-eye'" :aria-label="show ? 'إخفاء' : 'إظهار'" @click="show = !show" /></template>
           </UInput>
         </UFormField>
+        </template>
 
         <Transition enter-active-class="transition duration-300" enter-from-class="opacity-0 -translate-y-1" leave-active-class="transition duration-200" leave-to-class="opacity-0">
           <p v-if="error" class="mb-5 flex items-start gap-2 border-s-2 border-red-500 bg-red-50 px-3 py-2.5 text-sm text-red-800" role="alert"><UIcon name="i-lucide-circle-alert" class="mt-0.5 size-4 shrink-0" />{{ error }}</p>
         </Transition>
 
-        <UButton type="submit" size="xl" block :loading="busy" trailing-icon="i-lucide-arrow-left">دخول</UButton>
+        <UButton type="submit" size="xl" block :loading="busy" trailing-icon="i-lucide-arrow-left">{{ step === '2fa' ? 'تحقق ودخول' : 'دخول' }}</UButton>
+        <button v-if="step === '2fa'" type="button" class="mt-4 w-full cursor-pointer text-center text-sm font-semibold text-brand-600 hover:text-brand-900" @click="step = 'login'; error = ''">رجوع</button>
         <p class="mt-8 flex items-center gap-2 text-[12px] text-brand-500"><UIcon name="i-lucide-lock-keyhole" class="size-3.5" />اتصال مشفّر · الجلسات محمية بتجديد تلقائي</p>
       </form>
     </div>

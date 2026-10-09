@@ -9,3 +9,9 @@ export const fdatetime = (d: string | Date) => new Intl.DateTimeFormat('ar-EG-u-
 export const fnum = (n: number | string) => new Intl.NumberFormat('en-US').format(Number(n))
 export const hijri = (d: Date = new Date()) => new Intl.DateTimeFormat('ar-SA-u-ca-islamic-umalqura-nu-latn', { day: 'numeric', month: 'long', year: 'numeric' }).format(d)
 export const greg = (d: Date = new Date()) => new Intl.DateTimeFormat('ar-EG-u-nu-latn', { weekday: 'long', day: 'numeric', month: 'long' }).format(d)
+
+export const PAY_METHODS: Record<string, string> = { CASH: 'نقدًا', BANK_TRANSFER: 'تحويل بنكي', INSTAPAY: 'إنستا باي', WALLET: 'محفظة إلكترونية', CARD: 'بطاقة', REFUND: 'استرداد', OTHER: 'أخرى' }
+export const DOC_KINDS: Record<string, string> = { PASSPORT: 'جواز سفر', PHOTO: 'صورة شخصية', ID: 'بطاقة هوية', OTHER: 'مستند آخر' }
+export const AUDIT_ENTITIES: Record<string, string> = { bookings: 'الحجوزات', packages: 'البرامج', posts: 'المدونة', users: 'المستخدمون', settings: 'الإعدادات', documents: 'المستندات', auth: 'الدخول', faqs: 'الأسئلة', testimonials: 'الآراء', inquiries: 'الرسائل' }
+export const fsize = (n: number) => (n > 1048576 ? `${(n / 1048576).toFixed(1)} MB` : `${Math.max(1, Math.round(n / 1024))} KB`)
+export const dateInput = (d?: string | null) => (d ? new Date(d).toISOString().slice(0, 10) : '')

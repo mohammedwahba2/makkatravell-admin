@@ -28,6 +28,7 @@ const loading = computed(() => st.value === 'pending' && !data.value)
 <template>
   <div>
     <UiPageHead title="الحجوزات" sub="تابع طلبات الحجز وأكّدها">
+      <UButton to="/bookings/new" icon="i-lucide-plus">حجز يدوي</UButton>
       <UButton color="neutral" variant="outline" icon="i-lucide-download" :loading="exporting" @click="exportAll">تصدير Excel</UButton>
     </UiPageHead>
     <FilterBar v-model:q="q" v-model:chip="status" placeholder="بحث بالاسم أو الهاتف أو رقم الحجز" :chips="chips" :total="data?.total" unit="حجز" />

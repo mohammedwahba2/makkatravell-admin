@@ -62,10 +62,20 @@ export const useApi = () => {
     }
   }
 
+  /** Authenticated binary fetch (private documents): returns a Blob the caller can open in a new tab. */
+  async function blob(path: string, retry = true): Promise<Blob> {
+    try {
+      return await $fetch<Blob>(`${base}${path}`, { responseType: 'blob', headers: auth.tokens.value ? { Authorization: `Bearer ${auth.tokens.value.accessToken}` } : undefined })
+    } catch (e: any) {
+      if (e?.statusCode === 401 && retry && (await tryRefresh())) return blob(path, false)
+      throw e
+    }
+  }
+
   async function upload(input: File): Promise<string> {
     const file = await compress(input)
     const fd = new FormData(); fd.append('file', file)
     return (await api<{ url: string }>('/admin/uploads', { method: 'POST', body: fd })).url
   }
-  return { api, upload, download }
+  return { api, upload, download, blob, compress }
 }

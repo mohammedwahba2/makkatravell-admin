@@ -25,7 +25,7 @@ const groups = computed(() => [
     { to: '/testimonials', label: 'آراء العملاء', icon: 'i-lucide-quote' },
   ] },
   { title: 'النظام', items: [
-    ...(auth.user.value?.role === 'ADMIN' ? [{ to: '/users', label: 'الفريق', icon: 'i-lucide-users' }] : []),
+    ...(auth.user.value?.role === 'ADMIN' ? [{ to: '/users', label: 'الفريق', icon: 'i-lucide-users' }, { to: '/audit', label: 'سجل النشاط', icon: 'i-lucide-history' }] : []),
     { to: '/settings', label: 'إعدادات الموقع', icon: 'i-lucide-sliders-horizontal' },
   ] },
 ])
@@ -40,7 +40,7 @@ async function logout() {
 const pwOpen = ref(false)
 const menu = computed(() => [
   [{ label: auth.user.value?.email ?? '', type: 'label' as const }],
-  [{ label: 'تغيير كلمة المرور', icon: 'i-lucide-key-round', onSelect: () => { pwOpen.value = true } }],
+  [{ label: 'حسابي والأمان', icon: 'i-lucide-shield-check', to: '/account' }, { label: 'تغيير كلمة المرور', icon: 'i-lucide-key-round', onSelect: () => { pwOpen.value = true } }],
   [{ label: 'تسجيل الخروج', icon: 'i-lucide-log-out', color: 'error' as const, onSelect: logout }],
 ])
 const today = greg(), hj = hijri()
