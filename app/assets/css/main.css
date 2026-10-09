@@ -41,14 +41,14 @@ body { margin: 0; color: var(--color-brand-950); -webkit-font-smoothing: antiali
 .stagger > *:nth-child(5) { animation-delay: .22s; } .stagger > *:nth-child(6) { animation-delay: .27s; }
 .stagger > *:nth-child(n+7) { animation-delay: .32s; }
 .lift { transition: transform .25s cubic-bezier(.2,.8,.2,1), box-shadow .25s; }
-.lift:hover { transform: translateY(-3px); box-shadow: 0 14px 30px -14px rgb(59 36 24 / .28); }
+.lift:hover { transform: translateY(-3px); }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
 }
 
 /* ---- design language: hairlines, tight radius, tabular numerals ---- */
-.panel { background: #fff; border-radius: 10px; box-shadow: 0 1px 2px rgb(59 36 24 / .05), 0 10px 28px -16px rgb(59 36 24 / .14); }
+.panel { background: #fff; border-radius: 10px; }
 .num { font-family: var(--font-num); font-variant-numeric: tabular-nums; letter-spacing: -.02em; }
 .eyebrow { font-size: 11px; font-weight: 700; letter-spacing: .12em; color: var(--color-brand-500); }
 .hair { border-color: var(--color-brand-200); }
@@ -56,5 +56,11 @@ body { margin: 0; color: var(--color-brand-950); -webkit-font-smoothing: antiali
 .grain::after { content: ""; position: absolute; inset: 0; z-index: -1; opacity: .22; mix-blend-mode: overlay; pointer-events: none;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
 @keyframes draw { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
-@keyframes pulse-dot { 0% { box-shadow: 0 0 0 0 rgb(165 111 77 / .55); } 70%,100% { box-shadow: 0 0 0 8px rgb(165 111 77 / 0); } }
+@keyframes pulse-dot { 0% { outline: 0 solid rgb(165 111 77 / .55); } 100% { outline: 9px solid rgb(165 111 77 / 0); } }
 .pulse-dot { animation: pulse-dot 1.8s ease-out infinite; }
+
+/* ---- flat design: no shadows anywhere ----
+   Only shadow variables are zeroed so Nuxt UI rings (input borders, focus) keep working. */
+*, *::before, *::after { --tw-shadow: 0 0 #0000 !important; --tw-shadow-colored: 0 0 #0000 !important; --tw-inset-shadow: 0 0 #0000 !important; --tw-drop-shadow: initial !important; text-shadow: none !important; }
+[class*="drop-shadow"] { filter: none !important; }
+.panel, .lift, .lift:hover { box-shadow: none !important; }
