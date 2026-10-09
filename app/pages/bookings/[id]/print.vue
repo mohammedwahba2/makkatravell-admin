@@ -33,11 +33,11 @@ const today = new Intl.DateTimeFormat('ar-EG-u-nu-latn', { dateStyle: 'long' }).
 
       <section v-if="b.passengers.length"><h3>المسافرون</h3>
         <table class="grid"><thead><tr><th>#</th><th>الاسم</th><th>رقم الجواز</th><th>انتهاء الجواز</th><th>الجنسية</th></tr></thead>
-          <tbody><tr v-for="(p, i) in b.passengers" :key="p.id"><td class="num">{{ i + 1 }}</td><td>{{ p.fullName }}</td><td class="num" dir="ltr">{{ p.passportNo || '—' }}</td><td class="num">{{ p.passportExpiry ? fdate(p.passportExpiry) : '—' }}</td><td>{{ p.nationality || '—' }}</td></tr></tbody></table></section>
+          <tbody><tr v-for="(p, i) in b.passengers" :key="p.id"><td class="num">{{ Number(i) + 1 }}</td><td>{{ p.fullName }}</td><td class="num" dir="ltr">{{ p.passportNo || '—' }}</td><td class="num">{{ p.passportExpiry ? fdate(p.passportExpiry) : '—' }}</td><td>{{ p.nationality || '—' }}</td></tr></tbody></table></section>
 
       <section><h3>الحساب</h3>
         <table class="grid"><thead><tr><th>التاريخ</th><th>طريقة الدفع</th><th>المرجع</th><th class="end">المبلغ (ج.م)</th></tr></thead>
-          <tbody><tr v-for="p in [...b.payments].reverse()" :key="p.id"><td class="num">{{ fdate(p.paidAt) }}</td><td>{{ PAY_METHODS[p.method] ?? p.method }}</td><td class="num" dir="ltr">{{ p.reference || '—' }}</td><td class="num end">{{ fnum(p.amount) }}</td></tr>
+          <tbody><tr v-for="p in ([...b.payments] as any[]).reverse()" :key="p.id"><td class="num">{{ fdate(p.paidAt) }}</td><td>{{ PAY_METHODS[p.method] ?? p.method }}</td><td class="num" dir="ltr">{{ p.reference || '—' }}</td><td class="num end">{{ fnum(p.amount) }}</td></tr>
             <tr v-if="!b.payments.length"><td colspan="4" class="muted">لا توجد دفعات مسجّلة</td></tr></tbody></table>
         <div class="totals"><p><span>إجمالي قيمة الحجز</span><b class="num">{{ fnum(b.totalPrice) }} ج.م</b></p><p><span>المدفوع</span><b class="num">{{ fnum(b.paidAmount) }} ج.م</b></p><p class="due"><span>المتبقي</span><b class="num">{{ fnum(remaining) }} ج.م</b></p></div></section>
 

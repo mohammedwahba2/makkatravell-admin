@@ -4,7 +4,7 @@ const { api } = useApi()
 const notify = useNotify()
 const { data: pk } = await useAsyncData('pk-for-manual', () => api('/admin/packages', { query: { limit: 100 } }), { server: false })
 const pkgItems = computed(() => (pk.value?.items ?? []).filter((p: any) => p.isPublished).map((p: any) => ({ label: p.title, value: p.id })))
-const f = reactive({ packageId: '', departureId: '', roomType: 'TRIPLE', adults: 2, children: 0, fullName: '', phone: '', email: '', nationalId: '', notes: '', status: 'CONFIRMED', override: '' as string | number })
+const f = reactive<{ packageId: string; departureId: string; roomType: string; adults: number; children: number; fullName: string; phone: string; email: string; nationalId: string; notes: string; status: string; override: string | number | undefined }>({ packageId: '', departureId: '', roomType: 'TRIPLE', adults: 2, children: 0, fullName: '', phone: '', email: '', nationalId: '', notes: '', status: 'CONFIRMED', override: undefined })
 const pkg = computed(() => (pk.value?.items ?? []).find((p: any) => p.id === f.packageId))
 const depItems = computed(() => (pkg.value?.departures ?? []).map((d: any) => ({ label: `${fdate(d.date)} — متبقي ${d.seatsTotal - d.seatsTaken}`, value: d.id, disabled: d.seatsTotal - d.seatsTaken <= 0 })))
 watch(() => f.packageId, () => { f.departureId = depItems.value.find((d: any) => !d.disabled)?.value ?? '' })
@@ -20,7 +20,7 @@ async function save() {
   saving.value = true
   try {
     const body: Record<string, unknown> = { packageId: f.packageId, ...(f.departureId ? { departureId: f.departureId } : {}), roomType: f.roomType, adults: f.adults, children: f.children, fullName: f.fullName.trim(), phone: f.phone.replace(/\s/g, ''),
-      ...(f.email ? { email: f.email } : {}), ...(f.nationalId ? { nationalId: f.nationalId } : {}), ...(f.notes ? { notes: f.notes } : {}), status: f.status, ...(f.override !== '' ? { totalPrice: Number(f.override) } : {}) }
+      ...(f.email ? { email: f.email } : {}), ...(f.nationalId ? { nationalId: f.nationalId } : {}), ...(f.notes ? { notes: f.notes } : {}), status: f.status, ...(f.override !== undefined && f.override !== '' ? { totalPrice: Number(f.override) } : {}) }
     const r = await api('/admin/bookings', { method: 'POST', body }); notify.ok(`تم إنشاء الحجز ${r.reference}`); await navigateTo(`/bookings/${r.id}`)
   } catch (e) { notify.err(errMsg(e)) } finally { saving.value = false }
 }
@@ -51,7 +51,7 @@ const isEgPhone = (v: string) => /^\+?[0-9]{8,15}$/.test(v.replace(/\s/g, ''))
       <UCard class="rise h-fit"><template #header><h2 class="font-extrabold">الحساب</h2></template>
         <div class="space-y-4">
           <div class="rounded-xl bg-brand-50 p-4 text-sm"><p class="flex justify-between"><span>سعر الفرد</span><b class="num">{{ money(unit) }}</b></p><p class="mt-2 flex justify-between"><span>الإجمالي المحسوب</span><b class="num text-lg text-brand-900">{{ money(estimate) }}</b></p></div>
-          <UFormField label="تعديل الإجمالي (اختياري)" hint="لخصم أو سعر خاص"><UInput v-model="f.override" type="number" min="0" placeholder="اتركه فارغًا لاستخدام المحسوب" class="w-full" /></UFormField>
+          <UFormField label="تعديل الإجمالي (اختياري)" hint="لخصم أو سعر خاص"><UInput v-model.number="f.override" type="number" min="0" placeholder="اتركه فارغًا لاستخدام المحسوب" class="w-full" /></UFormField>
           <UFormField label="حالة الحجز"><USelect v-model="f.status" :items="stItems" class="w-full" /></UFormField>
           <p class="text-xs leading-6 text-brand-500">بعد الإنشاء تسجّل الدفعات وبيانات المسافرين من صفحة الحجز.</p>
         </div></UCard>
